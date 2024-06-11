@@ -1,23 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-void main() {
-  runApp(MyApp());
-}
+import '../pages/add_product_screen.dart';
+import '../pages/shopping.dart' as shopping;
+import '../pages/message.dart' as message;
+import '../pages/account.dart' as account;
+import 'category.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'E-Commerce',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomeInstaScreen(),
-    );
-  }
+class Brand {
+  final String name;
+  Brand({required this.name});
 }
 
 class HomeInstaScreen extends StatefulWidget {
@@ -37,241 +30,351 @@ class HomeInstaScreen extends StatefulWidget {
     Category(name: "Jeux & Jouets", icon: Icons.toys, color: Colors.amber),
   ];
 
+  final List<Brand> brands = [
+    Brand(name: "Brand 1"),
+    Brand(name: "Brand 2"),
+    Brand(name: "Brand 3"),
+  ];
+
+  final List<Product> fakeProducts = [
+    Product(
+      name: "T-shirt homme",
+      description: "T-shirt pour homme de couleur bleue",
+      price: 19.99,
+      brand: Brand(name: "Brand 1"),
+    ),
+    Product(
+      name: "Robe femme",
+      description: "Robe pour femme de couleur rouge",
+      price: 29.99,
+      brand: Brand(name: "Brand 2"),
+    ),
+    Product(
+      name: "Aspirateur",
+      description: "Aspirateur puissant pour nettoyer la maison",
+      price: 149.99,
+      brand: Brand(name: "Brand 3"),
+    ),
+    // Ajoutez plus de produits si nécessaire
+  ];
+
   @override
   _HomeInstaScreenState createState() => _HomeInstaScreenState();
 }
 
-class _HomeInstaScreenState extends State<HomeInstaScreen> {
+class _HomeInstaScreenState extends State<HomeInstaScreen>
+    with SingleTickerProviderStateMixin {
+  Color appBarColor = Colors.pink.shade200;
+  int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Product> _filteredProducts = [];
+  late FocusNode _searchFocusNode;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  bool _isHomeSelected = false;
+  bool _isShoppingSelected = false;
+  bool _isMessageSelected = false;
+  bool _isAccountSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
+    _isHomeSelected = true;
+    _searchFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_selectedIndex == 0 && ModalRoute.of(context)?.canPop == false) {
+      return SizedBox
+          .shrink(); // Renvoyer un widget vide si les conditions sont remplies
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Listes Categories',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.pink, // Changer la couleur de fond de l'AppBar
-        elevation: 0, // Supprimer l'ombre de l'AppBar
-        actions: [
-          IconButton(
-            icon: Icon(Icons.account_circle),
-            onPressed: () {
-              // Naviguer vers la page de paramètres du compte
-            },
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.pink.shade300,
-              ),
-              child: Text(
-                'lllllll Categories',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+      key: _scaffoldKey,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 170.0,
+              color: appBarColor,
+              child: AppBar(
+                automaticallyImplyLeading: false,
+                backgroundColor: Colors.transparent,
+                title: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 35.0, left: 30), // Ajouter un padding supérieur
+                  child: TextField(
+                    focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher un produit',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: _updateSearch,
+                  ),
+                ),
+                bottom: PreferredSize(
+                  preferredSize:
+                      Size.fromHeight(1.0), // Height of the bottom line
+                  child: Container(
+                    color: Colors.black, // Color of the bottom line
+                    height: 1.0, // Height of the bottom line
+                  ),
                 ),
               ),
             ),
-            for (var category in widget.categories)
-              ListTile(
-                title: Text(category.name),
-                onTap: () {
-                  Navigator.pop(context); // Fermer le Drawer
-                  // Naviguer vers l'écran de la catégorie sélectionnée
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CategoryScreen(category: category),
-                    ),
-                  );
-                },
-                // Set background color for each ListTile
-                tileColor: category.color,
-              ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          SizedBox(height: 20),
-          Container(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.categories.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            CategoryScreen(category: widget.categories[index]),
-                      ),
-                    );
+          ),
+          Positioned(
+            top: kToolbarHeight, // Adjust position as needed
+            left: 0,
+            right: 280,
+            child: Image.asset(
+              'assets/Logo1.png', // Chemin vers votre image
+              height: 60.0, // Ajustez la hauteur de l'image selon vos besoins
+              fit: BoxFit.contain, // Ajustez le mode de remplissage de l'image
+            ),
+          ),
+          CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: CategoryWidget(
+                  categories: widget.categories,
+                  onCategoryTap: (index) {
+                    showSubCategories(context, index, widget.categories);
                   },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.center,
-                    child: Text(
-                      widget.categories[index].name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: widget.categories[index].color,
+                ),
+              ),
+
+              // la liste des brands
+              SliverToBoxAdapter(
+                child: Container(
+                  child: ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: widget.brands.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        elevation: 5,
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            widget.brands[index].name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+//
+              // la liste des publiciter
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    elevation: 5,
+                    child: Container(
+                      height: 100, // Hauteur de votre publicité
+                      // Vous pouvez personnaliser le contenu de votre publicité ici
+                      child: Center(
+                        child: Text(
+                          "Votre publicité ici",
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Bienvenue sur notre E-Commerce',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
+
+      // boutton du ajout produit
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AddProductScreen(categories: widget.categories),
+              builder: (context) => AddProductScreen(
+                categories: widget.categories,
+                brands: widget.brands,
+              ),
             ),
           );
+
           _addProduct(result);
         },
         child: Icon(Icons.add),
-        tooltip: 'Add Product',
+        backgroundColor: Colors.pink,
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 60.0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: Icon(Icons.settings),
-                onPressed: () {
-                  // Naviguer vers la page des préférences
-                },
+
+      // la barre de navigation en bas de mon ecran
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return AnimatedContainer(
+            duration: Duration(milliseconds: 100),
+            transform: Matrix4.translationValues(
+                0.0, 50.0 * (1.0 - _animation.value), 0.0), // Move up and down
+            child: AnimatedOpacity(
+              opacity: _animation.value,
+              duration: Duration(milliseconds: 100),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                        color: Colors.black, width: 1.0), // Add top border
+                  ),
+                ),
+                child: BottomAppBar(
+                  child: Container(
+                    height: 50.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          icon: _selectedIndex == 0
+                              ? Icon(Icons.home)
+                              : Icon(Icons.home_outlined),
+                          onPressed: () {
+                            _onItemTapped(0);
+                          },
+                        ),
+                        IconButton(
+                          icon: _selectedIndex == 1
+                              ? Icon(Icons.shopping_bag)
+                              : Icon(Icons.shopping_bag_outlined),
+                          onPressed: () {
+                            _onItemTapped(1);
+                          },
+                        ),
+                        IconButton(
+                          icon: _selectedIndex == 2
+                              ? Icon(Icons.message)
+                              : Icon(Icons.message_outlined),
+                          onPressed: () {
+                            _onItemTapped(2);
+                          },
+                        ),
+                        IconButton(
+                          icon: _selectedIndex == 3
+                              ? Icon(Icons.account_circle)
+                              : Icon(Icons.account_circle_outlined),
+                          onPressed: () {
+                            _onItemTapped(3);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              IconButton(
-                icon: Icon(Icons.favorite),
-                onPressed: () {
-                  // Naviguer vers la page des favoris
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _addProduct(Map<String, dynamic> result) async {
-    if (result != null) {
-      Product newProduct = result['product'];
-      Category selectedCategory = result['category'];
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> productsJson =
-          prefs.getStringList(selectedCategory.name) ?? [];
-      productsJson.add(jsonEncode(newProduct.toJson()));
-      prefs.setStringList(selectedCategory.name, productsJson);
-
-      setState(() {
-        for (var category in widget.categories) {
-          if (category.name == selectedCategory.name) {
-            category.products.add(newProduct);
-            break;
-          }
-        }
-      });
-    }
-  }
-}
-
-class Category {
-  final String name;
-  final IconData icon;
-  final Color color;
-  final List<Product> products;
-
-  Category(
-      {required this.name,
-      required this.icon,
-      required this.color,
-      this.products = const []});
-}
-
-class CategoryScreen extends StatefulWidget {
-  final Category category;
-
-  CategoryScreen({required this.category});
-
-  @override
-  _CategoryScreenState createState() => _CategoryScreenState();
-}
-
-class _CategoryScreenState extends State<CategoryScreen> {
-  List<Product> _products = [];
-
-  @override
-  void initState() {
-    _loadProducts();
-    super.initState();
-  }
-
-  void _loadProducts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? productsJson = prefs.getStringList(widget.category.name);
-    if (productsJson != null) {
-      setState(() {
-        _products = productsJson
-            .map((json) => Product.fromJson(jsonDecode(json)))
-            .toList();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.category.name,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: _products.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(_products[index].name),
-            subtitle: Text(_products[index].description),
-            trailing: Text("\$${_products[index].price.toStringAsFixed(2)}"),
+            ),
           );
         },
       ),
     );
+  }
+
+  void _addProduct(dynamic result) async {
+    if (result != null && result is Product) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? storedProducts = prefs.getString('products');
+      List<Product> productsList = storedProducts != null
+          ? (json.decode(storedProducts) as List<dynamic>)
+              .map((item) => Product.fromJson(item))
+              .toList()
+          : [];
+
+      setState(() {
+        productsList.add(result);
+      });
+
+      prefs.setString('products', json.encode(productsList));
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _updateIconStates();
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeInstaScreen()),
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => shopping.ShoppingPage()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => message.MessagePage()),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => account.AccountPage()),
+        );
+        break;
+    }
+  }
+
+  void _updateSearch(String query) {
+    setState(() {
+      // Filtrer les produits en fonction du terme de recherche
+      _filteredProducts = widget.fakeProducts
+          .where((product) =>
+              product.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  void _updateIconStates() {
+    _isHomeSelected = _selectedIndex == 0;
+    _isShoppingSelected = _selectedIndex == 1;
+    _isMessageSelected = _selectedIndex == 2;
+    _isAccountSelected = _selectedIndex == 3;
   }
 }
 
@@ -279,13 +382,13 @@ class Product {
   final String name;
   final String description;
   final double price;
-  final List<String> images;
+  final Brand brand;
 
   Product({
     required this.name,
     required this.description,
     required this.price,
-    this.images = const [],
+    required this.brand,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -293,118 +396,14 @@ class Product {
       name: json['name'],
       description: json['description'],
       price: json['price'],
-      images: List<String>.from(json['images']),
+      brand: Brand(name: json['brand']['name']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description,
-      'price': price,
-      'images': images,
-    };
-  }
-}
-
-class AddProductScreen extends StatefulWidget {
-  final List<Category> categories;
-
-  AddProductScreen({required this.categories});
-
-  @override
-  _AddProductScreenState createState() => _AddProductScreenState();
-}
-
-class _AddProductScreenState extends State<AddProductScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  Category? selectedCategory;
-  List<String> selectedImages = [];
-
-  void _addImage() async {
-    final pickedImage =
-        await ImagePicker().getImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      setState(() {
-        selectedImages.add(pickedImage.path);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Product'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-              TextField(
-                controller: priceController,
-                decoration: InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.number,
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 12),
-                child: DropdownButton<Category>(
-                  hint: Text('Select Category'),
-                  value: selectedCategory,
-                  onChanged: (Category? newValue) {
-                    setState(() {
-                      selectedCategory = newValue!;
-                    });
-                  },
-                  items: widget.categories
-                      .map<DropdownMenuItem<Category>>((Category category) {
-                    return DropdownMenuItem<Category>(
-                      value: category,
-                      child: Text(category.name),
-                    );
-                  }).toList(),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _addImage,
-                child: Text('Add Image'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.isNotEmpty &&
-                      descriptionController.text.isNotEmpty &&
-                      priceController.text.isNotEmpty &&
-                      selectedCategory != null) {
-                    Product newProduct = Product(
-                      name: nameController.text,
-                      description: descriptionController.text,
-                      price: double.parse(priceController.text),
-                      images: selectedImages,
-                    );
-                    Navigator.pop(context,
-                        {'product': newProduct, 'category': selectedCategory});
-                  }
-                },
-                child: Text('Add Product'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'price': price,
+        'brand': {'name': brand.name},
+      };
 }

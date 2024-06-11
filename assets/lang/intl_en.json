@@ -1,0 +1,13 @@
+{
+  "title": "Automatic Translation",
+  "enter_text": "Enter text",
+  "translate_to_english": "Translate to English",
+  "translate_to_french": "Translate to French",
+  "translated_text": "Translated text",
+  "title": "Flutter Demo",
+  "home": "Home",
+  "splash_screen_title": "Welcome to Splash Screen",
+  "login_screen_title": "Login Screen",
+  "signup_screen_title": "Sign Up Screen"
+}
+

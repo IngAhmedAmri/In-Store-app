@@ -1,0 +1,12 @@
+{
+  "title": "Traduction Automatique",
+  "enter_text": "Entrez le texte",
+  "translate_to_english": "Traduire en Anglais",
+  "translate_to_french": "Traduire en Français",
+  "translated_text": "Texte traduit",
+  "title": "Démo Flutter",
+  "home": "Accueil",
+  "splash_screen_title": "Bienvenue à l'écran de démarrage",
+  "login_screen_title": "Écran de connexion",
+  "signup_screen_title": "Écran d'inscription"
+}
