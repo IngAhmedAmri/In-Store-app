@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'home_instascreen.dart';
 import 'product_model.dart' as ProductModel;
-import 'category.dart';
+import '../pages/category.dart';
 
 class AddProductScreen extends StatefulWidget {
   final List<Category> categories;

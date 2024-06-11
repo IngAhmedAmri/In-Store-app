@@ -1,4 +1,3 @@
-// category.dart
 import 'package:flutter/material.dart';
 
 class Category {
@@ -25,7 +24,7 @@ class CategoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: kToolbarHeight + 67),
+      margin: EdgeInsets.only(top: kToolbarHeight + 20),
       color: Colors.transparent,
       height: 40.0,
       child: ListView.builder(
@@ -36,7 +35,7 @@ class CategoryWidget extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 3.0),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.pink.shade100,
+                color: categories[index].color.withOpacity(0.2),
                 border: Border.all(color: Colors.black),
                 borderRadius: BorderRadius.circular(30.0),
               ),
@@ -46,14 +45,20 @@ class CategoryWidget extends StatelessWidget {
                 },
                 child: Padding(
                   padding: EdgeInsets.all(9.0),
-                  child: Text(
-                    categories[index].name,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Row(
+                    children: [
+                      Icon(categories[index].icon, size: 18),
+                      SizedBox(width: 5),
+                      Text(
+                        categories[index].name,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -63,25 +68,4 @@ class CategoryWidget extends StatelessWidget {
       ),
     );
   }
-}
-
-void showSubCategories(
-    BuildContext context, int index, List<Category> categories) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Sub-categories for ${categories[index].name}'),
-        content: Text('List of sub-categories for ${categories[index].name}'),
-        actions: [
-          TextButton(
-            child: Text('Close'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
 }

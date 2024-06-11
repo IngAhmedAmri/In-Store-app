@@ -5,7 +5,8 @@ import 'presentation/pages/login_instascreen.dart';
 import 'presentation/controllers/login_controller.dart';
 import 'presentation/pages/sign_upinstascreen.dart';
 import 'presentation/controllers/signup_controller.dart';
-
+import 'presentation/pages/category.dart';
+import 'presentation/pages/sub_category_screen.dart';
 
 void main() {
   runApp(MyApp());

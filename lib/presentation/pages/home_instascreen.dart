@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
+import '../pages/sub_category_screen.dart';
 import '../pages/add_product_screen.dart';
 import '../pages/shopping.dart' as shopping;
 import '../pages/message.dart' as message;
@@ -62,6 +62,7 @@ class HomeInstaScreen extends StatefulWidget {
   _HomeInstaScreenState createState() => _HomeInstaScreenState();
 }
 
+
 class _HomeInstaScreenState extends State<HomeInstaScreen>
     with SingleTickerProviderStateMixin {
   Color appBarColor = Colors.pink.shade200;
@@ -98,6 +99,18 @@ class _HomeInstaScreenState extends State<HomeInstaScreen>
     _animationController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void showSubCategories(
+      BuildContext context, int index, List<Category> categories) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SubCategoryScreen(
+          category: categories[index],
+        ),
+      ),
+    );
   }
 
   @override
@@ -166,79 +179,14 @@ class _HomeInstaScreenState extends State<HomeInstaScreen>
                 ),
               ),
 
-              // la liste des brands
-              SliverToBoxAdapter(
-                child: Container(
-                  child: ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: widget.brands.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        elevation: 5,
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            widget.brands[index].name,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-//
-              // la liste des publiciter
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    elevation: 5,
-                    child: Container(
-                      height: 100, // Hauteur de votre publicité
-                      // Vous pouvez personnaliser le contenu de votre publicité ici
-                      child: Center(
-                        child: Text(
-                          "Votre publicité ici",
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+
             ],
           ),
+          
         ],
       ),
 
-      // boutton du ajout produit
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddProductScreen(
-                categories: widget.categories,
-                brands: widget.brands,
-              ),
-            ),
-          );
 
-          _addProduct(result);
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.pink,
-      ),
 
       // la barre de navigation en bas de mon ecran
       bottomNavigationBar: AnimatedBuilder(
