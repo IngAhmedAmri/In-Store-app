@@ -10,11 +10,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    flutter_animated_text_kit: ^4.2.1
   cupertino_icons: ^1.0.6
-  http: ^0.13.3  # Ajout du package http
+  http: ^0.13.4  # Ajout du package http
   image_picker: ^0.8.4+4
   get: ^4.6.1
-  shared_preferences: ^2.0.0
+  shared_preferences: ^2.0.7
+  permission_handler: ^10.0.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +32,12 @@ flutter:
     - assets/Formbackground2.png
     - assets/Fournisseur.jpg
     - assets/Instagrammeur.jpg
+    - assets/Product1.png
+    - assets/Product2.png
+    - assets/Mixeur.png
+    - assets/Cafetiere.jpeg
+    - assets/Refrigerateur.png
+    - assets/Lave-linge.jpg
 
   fonts:
     - family: Schyler

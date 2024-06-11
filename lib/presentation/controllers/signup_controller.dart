@@ -8,7 +8,7 @@ class SignUpController {
   };
   Future<void> registerAccountWithJson(
       Map<String, dynamic> jsonBody, File image) async {
-    var url = Uri.parse('http://192.168.126.1:8000/api/register');
+    var url = Uri.parse('http://192.168.100.12:8000/api/register');
 
     try {
       var uri = Uri.parse('${url}');
@@ -48,7 +48,7 @@ class SignUpController {
     required String companyName,
     required bool companyUnderConstruction,
   }) async {
-    var url = Uri.parse('http://192.168.126.1:8000/api/register');
+    var url = Uri.parse('http://192.168.100.12:8000/api/register');
     print('URL: $url'); // Affichage de l'URL dans le terminal
 
     try {
